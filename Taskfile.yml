@@ -1,0 +1,45 @@
+# https://taskfile.dev
+
+version: '3'
+
+dotenv: ['.env']
+
+tasks:
+  run:
+    desc: Build and run containers
+    cmds:
+      - task: migrate-up
+      - task: up-go
+
+  up-postgres:
+    desc: Run postgres container
+    cmds:
+      - docker compose up -d postgres
+
+  build-go:
+    desc: Build go image
+    cmds:
+      - docker compose build go
+
+  up-go:
+    desc: Run go container
+    deps: [build-go]
+    cmds:
+      - docker compose up go
+
+  migrate-up:
+    desc: Run database migrations
+    deps: [up-postgres]
+    cmds:
+      - docker compose exec postgres sh -c "until pg_isready; do sleep 1; done"
+      - migrate -path ./migration -database ${DB_MIGRATION_URL} up
+
+  stop:
+    desc: Stop all containers
+    cmds:
+      - docker compose down
+
+  prune:
+    desc: Remove all unused docker resources
+    cmds:
+      - docker system prune -af

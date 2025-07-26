@@ -19,7 +19,7 @@ func TestHealthCheck(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, res.StatusCode)
 
-	expected := "HTTP server works correctly"
+	expected := "http server works correctly"
 	body := rec.Body.String()
 	assert.Equal(t, expected, body)
 }
