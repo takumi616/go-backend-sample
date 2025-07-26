@@ -1,9 +1,34 @@
 services:
-  server:
+  go:
     build:
       context: .
       target: final
     environment:
-      - APP_PORT=${APP_PORT}
+      - APP_PORT=${GO_CONTAINER_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_CONTAINER_PORT=${POSTGRES_CONTAINER_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_SSLMODE=${POSTGRES_SSLMODE}
+      - POSTGRES_DRIVER=${POSTGRES_DRIVER}
     ports:
-      - "${APP_PORT_LOCAL}:${APP_PORT}"
+      - "${GO_PORT}:${GO_CONTAINER_PORT}"
+  postgres:
+    image: postgres
+    restart: always
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_CONTAINER_PORT}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  db-data:
